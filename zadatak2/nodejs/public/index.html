@@ -1,0 +1,52 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style type="text/css" media="screen">
+		.service{
+			padding:20px;
+			color:red;
+		}
+		.subscribed{
+			color:green;
+		}
+	</style>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" type="text/javascript" charset="utf-8" ></script>
+
+	<script type="text/javascript" >
+		$(document).ready(function(){
+			var ws = new WebSocket("ws://"+ location.hostname + ":8000/comms");
+			var services = ["service1","service2"];
+
+			ws.onopen = function (event) {
+				console.log('connected');
+			};
+			ws.onmessage = function (event) {
+				var data = JSON.parse(event.data);
+			  $("body").append("<span>"+"Message from service "+data.name+": "+data.message+"</span></br>");
+			};
+
+
+			services.forEach(function(service){
+				var el = $('<a href="javascript:;" class="service">'+service+'</a>');
+				$(el).on('click',function(){
+					if ($(this).hasClass('subscribed')){
+						ws.send(JSON.stringify({subscribe:false,serviceName:service}));
+						$(this).removeClass('subscribed')
+					}else{
+						ws.send(JSON.stringify({subscribe:true,serviceName:service}));
+						$(this).addClass('subscribed')
+					}
+					return false;
+				});
+				$("body").append(el);
+			});
+			$("body").append("</br>")
+		});
+	</script>
+</head>
+<body>
+
+</body>
+</html>
